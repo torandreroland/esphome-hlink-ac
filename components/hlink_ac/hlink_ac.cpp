@@ -33,6 +33,14 @@ optional<uint8_t> encode_hlink_fan_mode(climate::ClimateFanMode fan_mode) {
   switch (fan_mode) {
     case climate::ClimateFanMode::CLIMATE_FAN_AUTO:
       return HLINK_FAN_AUTO;
+    case climate::ClimateFanMode::CLIMATE_FAN_QUIET:
+      return HLINK_FAN_QUIET;
+    case climate::ClimateFanMode::CLIMATE_FAN_LOW:
+      return HLINK_FAN_LOW;
+    case climate::ClimateFanMode::CLIMATE_FAN_MEDIUM:
+      return HLINK_FAN_MEDIUM;
+    case climate::ClimateFanMode::CLIMATE_FAN_HIGH:
+      return HLINK_FAN_HIGH;
     default:
       return {};
   }
