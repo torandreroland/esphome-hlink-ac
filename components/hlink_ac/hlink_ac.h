@@ -111,6 +111,7 @@ constexpr uint8_t HLINK_FAN_MEDIUM = 0x02;
 constexpr uint8_t HLINK_FAN_LOW = 0x03;
 constexpr uint8_t HLINK_FAN_QUIET = 0x04;
 
+static const char *const ESPHOME_FAN_AUTO = "Auto";
 static const char *const ESPHOME_FAN_LEVEL_1 = "Quiet";
 static const char *const ESPHOME_FAN_LEVEL_2 = "Low";
 static const char *const ESPHOME_FAN_LEVEL_3 = "Medium";

@@ -49,12 +49,7 @@ CUSTOM_FAN_MODES = {
     "LEVEL_2": "Low",
     "LEVEL_3": "Medium",
     "LEVEL_4": "High",
-}
-CUSTOM_FAN_MODE_BUILTIN_ALIASES = {
-    "LEVEL_1": ClimateFanMode.CLIMATE_FAN_QUIET,
-    "LEVEL_2": ClimateFanMode.CLIMATE_FAN_LOW,
-    "LEVEL_3": ClimateFanMode.CLIMATE_FAN_MEDIUM,
-    "LEVEL_4": ClimateFanMode.CLIMATE_FAN_HIGH,
+    "AUTO": "Auto",
 }
 SUPPORTED_CLIMATE_MODES_OPTIONS = {
     "OFF": ClimateMode.CLIMATE_MODE_OFF,
@@ -78,7 +73,6 @@ DEFAULT_SWING_MODE_OPTIONS = [
 ]
 
 SUPPORTED_FAN_MODES_OPTIONS = {
-    "AUTO": ClimateFanMode.CLIMATE_FAN_AUTO,
     **CUSTOM_FAN_MODES,
 }
 
@@ -250,16 +244,12 @@ async def to_code(config):
     if CONF_SUPPORTED_SWING_MODES in config:
         cg.add(var.set_supported_swing_modes(config[CONF_SUPPORTED_SWING_MODES]))
     if CONF_SUPPORTED_FAN_MODES in config:
-        supported_builtin_fan_modes = [
-            CUSTOM_FAN_MODE_BUILTIN_ALIASES.get(str(mode), mode)
-            for mode in config[CONF_SUPPORTED_FAN_MODES]
-        ]
         supported_custom_fan_modes = [
             CUSTOM_FAN_MODES[str(mode)]
             for mode in config[CONF_SUPPORTED_FAN_MODES]
             if str(mode) in CUSTOM_FAN_MODES
         ]
-        cg.add(var.set_supported_fan_modes(supported_builtin_fan_modes))
+        cg.add(var.set_supported_fan_modes([]))
         cg.add(var.set_supported_custom_fan_modes(supported_custom_fan_modes))
     if CONF_SUPPORTED_PRESETS in config:
         cg.add(var.set_supported_climate_presets(config[CONF_SUPPORTED_PRESETS]))

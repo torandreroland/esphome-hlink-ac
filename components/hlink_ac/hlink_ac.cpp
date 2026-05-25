@@ -15,7 +15,7 @@ struct HlinkFanMode {
 optional<HlinkFanMode> decode_hlink_fan_mode(uint16_t hlink_fan_mode) {
   switch (hlink_fan_mode) {
     case HLINK_FAN_AUTO:
-      return HlinkFanMode{climate::ClimateFanMode::CLIMATE_FAN_AUTO, {}};
+      return HlinkFanMode{{}, ESPHOME_FAN_AUTO};
     case HLINK_FAN_QUIET:
       return HlinkFanMode{{}, ESPHOME_FAN_LEVEL_1};
     case HLINK_FAN_LOW:
@@ -47,6 +47,9 @@ optional<uint8_t> encode_hlink_fan_mode(climate::ClimateFanMode fan_mode) {
 }
 
 optional<uint8_t> encode_hlink_custom_fan_mode(const char *custom_fan_mode) {
+  if (strcmp(custom_fan_mode, ESPHOME_FAN_AUTO) == 0) {
+    return HLINK_FAN_AUTO;
+  }
   if (strcmp(custom_fan_mode, ESPHOME_FAN_LEVEL_1) == 0) {
     return HLINK_FAN_QUIET;
   }
