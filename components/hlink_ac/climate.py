@@ -44,12 +44,16 @@ PROTOCOL_TARGET_TEMPERATURE_STEP = 1.0
 PROTOCOL_CURRENT_TEMPERATURE_STEP = 1.0
 
 SUPPORT_HVAC_ACTIONS = "hvac_actions"
+# ESPHome parses custom fan mode commands as built-in fan modes first. These
+# labels intentionally include an invisible suffix to avoid colliding with
+# built-in AUTO/QUIET/LOW/MEDIUM/HIGH while rendering the same in Home Assistant.
+CUSTOM_FAN_MODE_SUFFIX = "\u200B"
 CUSTOM_FAN_MODES = {
-    "LEVEL_1": "Quiet",
-    "LEVEL_2": "Low",
-    "LEVEL_3": "Medium",
-    "LEVEL_4": "High",
-    "AUTO": "Auto",
+    "LEVEL_1": f"Quiet{CUSTOM_FAN_MODE_SUFFIX}",
+    "LEVEL_2": f"Low{CUSTOM_FAN_MODE_SUFFIX}",
+    "LEVEL_3": f"Medium{CUSTOM_FAN_MODE_SUFFIX}",
+    "LEVEL_4": f"High{CUSTOM_FAN_MODE_SUFFIX}",
+    "AUTO": f"Auto{CUSTOM_FAN_MODE_SUFFIX}",
 }
 SUPPORTED_CLIMATE_MODES_OPTIONS = {
     "OFF": ClimateMode.CLIMATE_MODE_OFF,
