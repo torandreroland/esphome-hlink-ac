@@ -45,10 +45,10 @@ PROTOCOL_CURRENT_TEMPERATURE_STEP = 1.0
 
 SUPPORT_HVAC_ACTIONS = "hvac_actions"
 CUSTOM_FAN_MODES = {
-    "LEVEL_1": "Quiet",
-    "LEVEL_2": "Low",
-    "LEVEL_3": "Medium",
-    "LEVEL_4": "High",
+    "LEVEL_1": "Level 1",
+    "LEVEL_2": "Level 2",
+    "LEVEL_3": "Level 3",
+    "LEVEL_4": "Level 4",
 }
 SUPPORTED_CLIMATE_MODES_OPTIONS = {
     "OFF": ClimateMode.CLIMATE_MODE_OFF,
