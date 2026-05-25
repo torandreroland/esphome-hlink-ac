@@ -112,10 +112,10 @@ constexpr uint8_t HLINK_FAN_LOW = 0x03;
 constexpr uint8_t HLINK_FAN_QUIET = 0x04;
 
 // Invisible suffix keeps these labels from being parsed as built-in ESPHome fan modes.
-static const char *const ESPHOME_FAN_LEVEL_1 = "Quiet\xE2\x80\x8B";
-static const char *const ESPHOME_FAN_LEVEL_2 = "Low\xE2\x80\x8B";
-static const char *const ESPHOME_FAN_LEVEL_3 = "Medium\xE2\x80\x8B";
-static const char *const ESPHOME_FAN_LEVEL_4 = "High\xE2\x80\x8B";
+static const char *const ESPHOME_FAN_QUIET = "Quiet\xE2\x80\x8B";
+static const char *const ESPHOME_FAN_LOW = "Low\xE2\x80\x8B";
+static const char *const ESPHOME_FAN_MEDIUM = "Medium\xE2\x80\x8B";
+static const char *const ESPHOME_FAN_HIGH = "High\xE2\x80\x8B";
 
 constexpr uint16_t HLINK_REMOTE_LOCK_ON = 0x0001;
 constexpr uint16_t HLINK_REMOTE_LOCK_OFF = 0x0000;

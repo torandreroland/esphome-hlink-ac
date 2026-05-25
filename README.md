@@ -154,8 +154,8 @@ climate:
       - BOTH
     supported_fan_modes:
       - AUTO
-      - LEVEL_2
-      - LEVEL_4
+      - LOW
+      - HIGH
     visual:
       min_temperature: 16.0
       max_temperature: 28.0
@@ -184,10 +184,10 @@ esphome:
       - `FAN_ONLY`
       - `HEAT_COOL`
     - Fan mode:
-      - `LEVEL_1`
-      - `LEVEL_2`
-      - `LEVEL_3`
-      - `LEVEL_4`
+      - `QUIET`
+      - `LOW`
+      - `MEDIUM`
+      - `HIGH`
       - `AUTO`
     - Swing mode:
       - `OFF`

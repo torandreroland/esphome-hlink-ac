@@ -17,13 +17,13 @@ optional<HlinkFanMode> decode_hlink_fan_mode(uint16_t hlink_fan_mode) {
     case HLINK_FAN_AUTO:
       return HlinkFanMode{climate::ClimateFanMode::CLIMATE_FAN_AUTO, {}};
     case HLINK_FAN_QUIET:
-      return HlinkFanMode{{}, ESPHOME_FAN_LEVEL_1};
+      return HlinkFanMode{{}, ESPHOME_FAN_QUIET};
     case HLINK_FAN_LOW:
-      return HlinkFanMode{{}, ESPHOME_FAN_LEVEL_2};
+      return HlinkFanMode{{}, ESPHOME_FAN_LOW};
     case HLINK_FAN_MEDIUM:
-      return HlinkFanMode{{}, ESPHOME_FAN_LEVEL_3};
+      return HlinkFanMode{{}, ESPHOME_FAN_MEDIUM};
     case HLINK_FAN_HIGH:
-      return HlinkFanMode{{}, ESPHOME_FAN_LEVEL_4};
+      return HlinkFanMode{{}, ESPHOME_FAN_HIGH};
     default:
       return {};
   }
@@ -47,16 +47,16 @@ optional<uint8_t> encode_hlink_fan_mode(climate::ClimateFanMode fan_mode) {
 }
 
 optional<uint8_t> encode_hlink_custom_fan_mode(const char *custom_fan_mode) {
-  if (strcmp(custom_fan_mode, ESPHOME_FAN_LEVEL_1) == 0) {
+  if (strcmp(custom_fan_mode, ESPHOME_FAN_QUIET) == 0) {
     return HLINK_FAN_QUIET;
   }
-  if (strcmp(custom_fan_mode, ESPHOME_FAN_LEVEL_2) == 0) {
+  if (strcmp(custom_fan_mode, ESPHOME_FAN_LOW) == 0) {
     return HLINK_FAN_LOW;
   }
-  if (strcmp(custom_fan_mode, ESPHOME_FAN_LEVEL_3) == 0) {
+  if (strcmp(custom_fan_mode, ESPHOME_FAN_MEDIUM) == 0) {
     return HLINK_FAN_MEDIUM;
   }
-  if (strcmp(custom_fan_mode, ESPHOME_FAN_LEVEL_4) == 0) {
+  if (strcmp(custom_fan_mode, ESPHOME_FAN_HIGH) == 0) {
     return HLINK_FAN_HIGH;
   }
   return {};
