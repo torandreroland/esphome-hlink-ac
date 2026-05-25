@@ -1,9 +1,58 @@
 #include "esphome/core/log.h"
 #include "hlink_ac.h"
 
+#include <cstring>
+
 namespace esphome {
 namespace hlink_ac {
 static const char *const TAG = "hlink_ac";
+
+struct HlinkFanMode {
+  optional<climate::ClimateFanMode> fan_mode;
+  optional<const char *> custom_fan_mode;
+};
+
+optional<HlinkFanMode> decode_hlink_fan_mode(uint16_t hlink_fan_mode) {
+  switch (hlink_fan_mode) {
+    case HLINK_FAN_AUTO:
+      return HlinkFanMode{climate::ClimateFanMode::CLIMATE_FAN_AUTO, {}};
+    case HLINK_FAN_QUIET:
+      return HlinkFanMode{{}, ESPHOME_FAN_LEVEL_1};
+    case HLINK_FAN_LOW:
+      return HlinkFanMode{{}, ESPHOME_FAN_LEVEL_2};
+    case HLINK_FAN_MEDIUM:
+      return HlinkFanMode{{}, ESPHOME_FAN_LEVEL_3};
+    case HLINK_FAN_HIGH:
+      return HlinkFanMode{{}, ESPHOME_FAN_LEVEL_4};
+    default:
+      return {};
+  }
+}
+
+optional<uint8_t> encode_hlink_fan_mode(climate::ClimateFanMode fan_mode) {
+  switch (fan_mode) {
+    case climate::ClimateFanMode::CLIMATE_FAN_AUTO:
+      return HLINK_FAN_AUTO;
+    default:
+      return {};
+  }
+}
+
+optional<uint8_t> encode_hlink_custom_fan_mode(const char *custom_fan_mode) {
+  if (strcmp(custom_fan_mode, ESPHOME_FAN_LEVEL_1) == 0) {
+    return HLINK_FAN_QUIET;
+  }
+  if (strcmp(custom_fan_mode, ESPHOME_FAN_LEVEL_2) == 0) {
+    return HLINK_FAN_LOW;
+  }
+  if (strcmp(custom_fan_mode, ESPHOME_FAN_LEVEL_3) == 0) {
+    return HLINK_FAN_MEDIUM;
+  }
+  if (strcmp(custom_fan_mode, ESPHOME_FAN_LEVEL_4) == 0) {
+    return HLINK_FAN_HIGH;
+  }
+  return {};
+}
 
 const HlinkResponseFrame HLINK_RESPONSE_NOTHING = {HlinkResponseFrame::Status::NOTHING};
 const HlinkResponseFrame HLINK_RESPONSE_PARTIAL = {HlinkResponseFrame::Status::PARTIAL};
@@ -94,16 +143,13 @@ HlinkAc::HlinkAc() {
        }});
   this->status_.polling_features.push_back(
       {{HlinkRequestFrame::Type::MT, {FeatureType::FAN_MODE}}, [this](const HlinkResponseFrame &response) {
-         if (response.p_value_as_uint16() == HLINK_FAN_AUTO) {
-           this->hlink_entity_status_.fan_mode = esphome::climate::ClimateFanMode::CLIMATE_FAN_AUTO;
-         } else if (response.p_value_as_uint16() == HLINK_FAN_HIGH) {
-           this->hlink_entity_status_.fan_mode = esphome::climate::ClimateFanMode::CLIMATE_FAN_HIGH;
-         } else if (response.p_value_as_uint16() == HLINK_FAN_MEDIUM) {
-           this->hlink_entity_status_.fan_mode = esphome::climate::ClimateFanMode::CLIMATE_FAN_MEDIUM;
-         } else if (response.p_value_as_uint16() == HLINK_FAN_LOW) {
-           this->hlink_entity_status_.fan_mode = esphome::climate::ClimateFanMode::CLIMATE_FAN_LOW;
-         } else if (response.p_value_as_uint16() == HLINK_FAN_QUIET) {
-           this->hlink_entity_status_.fan_mode = esphome::climate::ClimateFanMode::CLIMATE_FAN_QUIET;
+         auto hlink_fan_mode = response.p_value_as_uint16();
+         if (hlink_fan_mode.has_value()) {
+           auto decoded_fan_mode = decode_hlink_fan_mode(hlink_fan_mode.value());
+           if (decoded_fan_mode.has_value()) {
+             this->hlink_entity_status_.fan_mode = decoded_fan_mode.value().fan_mode;
+             this->hlink_entity_status_.custom_fan_mode = decoded_fan_mode.value().custom_fan_mode;
+           }
          }
        }});
 }
@@ -132,6 +178,13 @@ void HlinkAc::setup() {
 }
 
 void HlinkAc::dump_config() {
+  const char *fan_mode = "N/A";
+  if (this->hlink_entity_status_.fan_mode.has_value()) {
+    fan_mode = LOG_STR_ARG(climate_fan_mode_to_string(this->hlink_entity_status_.fan_mode.value()));
+  } else if (this->hlink_entity_status_.custom_fan_mode.has_value()) {
+    fan_mode = this->hlink_entity_status_.custom_fan_mode.value();
+  }
+
   ESP_LOGCONFIG(
       TAG,
       "Hlink AC:\n"
@@ -150,9 +203,7 @@ void HlinkAc::dump_config() {
       this->hlink_entity_status_.mode.has_value()
           ? LOG_STR_ARG(climate_mode_to_string(this->hlink_entity_status_.mode.value()))
           : "N/A",
-      this->hlink_entity_status_.fan_mode.has_value()
-          ? LOG_STR_ARG(climate_fan_mode_to_string(this->hlink_entity_status_.fan_mode.value()))
-          : "N/A",
+      fan_mode,
       this->hlink_entity_status_.swing_mode.has_value()
           ? LOG_STR_ARG(climate_swing_mode_to_string(this->hlink_entity_status_.swing_mode.value()))
           : "N/A",
@@ -415,9 +466,13 @@ void HlinkAc::publish_updates_if_any_() {
       should_publish_climate_state = true;
     }
     // Fan Mode
-    if (this->hlink_entity_status_.fan_mode.has_value() &&
-        this->fan_mode != this->hlink_entity_status_.fan_mode.value()) {
-      this->fan_mode = this->hlink_entity_status_.fan_mode.value();
+    if (this->hlink_entity_status_.custom_fan_mode.has_value() &&
+        (!this->has_custom_fan_mode() ||
+         strcmp(this->get_custom_fan_mode().c_str(), this->hlink_entity_status_.custom_fan_mode.value()) != 0)) {
+      this->set_custom_fan_mode_(this->hlink_entity_status_.custom_fan_mode.value());
+      should_publish_climate_state = true;
+    } else if (this->hlink_entity_status_.fan_mode.has_value() &&
+               this->set_fan_mode_(this->hlink_entity_status_.fan_mode.value())) {
       should_publish_climate_state = true;
     }
     // Swing Mode
@@ -716,29 +771,30 @@ void HlinkAc::control(const esphome::climate::ClimateCall &call) {
   }
   if (call.get_fan_mode().has_value()) {
     climate::ClimateFanMode fan_mode = *call.get_fan_mode();
-    uint8_t h_link_fan_speed = HLINK_FAN_AUTO;
-    switch (fan_mode) {
-      case climate::ClimateFanMode::CLIMATE_FAN_AUTO:
-        h_link_fan_speed = HLINK_FAN_AUTO;
-        break;
-      case climate::ClimateFanMode::CLIMATE_FAN_HIGH:
-        h_link_fan_speed = HLINK_FAN_HIGH;
-        break;
-      case climate::ClimateFanMode::CLIMATE_FAN_MEDIUM:
-        h_link_fan_speed = HLINK_FAN_MEDIUM;
-        break;
-      case climate::ClimateFanMode::CLIMATE_FAN_LOW:
-        h_link_fan_speed = HLINK_FAN_LOW;
-        break;
-      case climate::ClimateFanMode::CLIMATE_FAN_QUIET:
-        h_link_fan_speed = HLINK_FAN_QUIET;
-        break;
+    auto h_link_fan_speed = encode_hlink_fan_mode(fan_mode);
+    if (!h_link_fan_speed.has_value()) {
+      return;
     }
     this->enqueue_request_(
-        HlinkRequestFrame::with_uint8(HlinkRequestFrame::Type::ST, FeatureType::FAN_MODE, h_link_fan_speed),
+        HlinkRequestFrame::with_uint8(HlinkRequestFrame::Type::ST, FeatureType::FAN_MODE, h_link_fan_speed.value()),
         [this, fan_mode](const HlinkResponseFrame &response) {
           this->hlink_entity_status_.fan_mode = fan_mode;
-          this->fan_mode = fan_mode;
+          this->hlink_entity_status_.custom_fan_mode = {};
+          this->set_fan_mode_(fan_mode);
+          this->publish_state();
+        });
+  } else if (call.has_custom_fan_mode()) {
+    const char *custom_fan_mode = call.get_custom_fan_mode().c_str();
+    auto h_link_fan_speed = encode_hlink_custom_fan_mode(custom_fan_mode);
+    if (!h_link_fan_speed.has_value()) {
+      return;
+    }
+    this->enqueue_request_(
+        HlinkRequestFrame::with_uint8(HlinkRequestFrame::Type::ST, FeatureType::FAN_MODE, h_link_fan_speed.value()),
+        [this, custom_fan_mode](const HlinkResponseFrame &response) {
+          this->hlink_entity_status_.fan_mode = {};
+          this->hlink_entity_status_.custom_fan_mode = custom_fan_mode;
+          this->set_custom_fan_mode_(custom_fan_mode);
           this->publish_state();
         });
   }

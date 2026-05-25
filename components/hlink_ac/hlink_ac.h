@@ -60,6 +60,7 @@ struct HlinkEntityStatus {
   optional<int8_t> target_temperature_auto_offset;
   optional<float> current_temperature_auto_offset;
   optional<esphome::climate::ClimateFanMode> fan_mode;
+  optional<const char *> custom_fan_mode;
   optional<esphome::climate::ClimateSwingMode> swing_mode;
   optional<bool> leave_home_enabled;
   optional<std::string> model_name;
@@ -109,6 +110,11 @@ constexpr uint8_t HLINK_FAN_HIGH = 0x01;
 constexpr uint8_t HLINK_FAN_MEDIUM = 0x02;
 constexpr uint8_t HLINK_FAN_LOW = 0x03;
 constexpr uint8_t HLINK_FAN_QUIET = 0x04;
+
+static const char *const ESPHOME_FAN_LEVEL_1 = "Level 1";
+static const char *const ESPHOME_FAN_LEVEL_2 = "Level 2";
+static const char *const ESPHOME_FAN_LEVEL_3 = "Level 3";
+static const char *const ESPHOME_FAN_LEVEL_4 = "Level 4";
 
 constexpr uint16_t HLINK_REMOTE_LOCK_ON = 0x0001;
 constexpr uint16_t HLINK_REMOTE_LOCK_OFF = 0x0000;
