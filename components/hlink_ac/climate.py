@@ -68,10 +68,10 @@ DEFAULT_SWING_MODE_OPTIONS = [
 
 SUPPORTED_FAN_MODES_OPTIONS = {
     "AUTO": ClimateFanMode.CLIMATE_FAN_AUTO,
+    "QUIET": ClimateFanMode.CLIMATE_FAN_QUIET,
     "LOW": ClimateFanMode.CLIMATE_FAN_LOW,
     "MEDIUM": ClimateFanMode.CLIMATE_FAN_MEDIUM,
     "HIGH": ClimateFanMode.CLIMATE_FAN_HIGH,
-    "QUIET": ClimateFanMode.CLIMATE_FAN_QUIET,
 }
 
 SUPPORTED_CLIMATE_PRESETS_OPTIONS = {
@@ -242,7 +242,7 @@ async def to_code(config):
     if CONF_SUPPORTED_SWING_MODES in config:
         cg.add(var.set_supported_swing_modes(config[CONF_SUPPORTED_SWING_MODES]))
     if CONF_SUPPORTED_FAN_MODES in config:
-        cg.add(var.set_supported_fan_modes(config[CONF_SUPPORTED_FAN_MODES]))
+        cg.add(var.set_supported_fan_modes_ordered(config[CONF_SUPPORTED_FAN_MODES]))
     if CONF_SUPPORTED_PRESETS in config:
         cg.add(var.set_supported_climate_presets(config[CONF_SUPPORTED_PRESETS]))
     if SUPPORT_HVAC_ACTIONS in config:
