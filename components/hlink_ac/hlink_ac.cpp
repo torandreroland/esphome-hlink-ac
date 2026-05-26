@@ -831,7 +831,7 @@ void HlinkAc::set_supported_swing_modes(esphome::climate::ClimateSwingModeMask m
        }});
 }
 
-void HlinkAc::set_supported_fan_modes_ordered(esphome::climate::ClimateFanModeMask modes) {
+void HlinkAc::set_supported_fan_modes_ordered(std::initializer_list<esphome::climate::ClimateFanMode> modes) {
   this->traits_.set_supported_fan_modes_ordered(modes);
 }
 
